@@ -1,4 +1,4 @@
-use battery::{units::ratio::percent, Battery, Error, Manager};
+use battery::{units::ratio::ratio, Battery, Error, Manager};
 use once_cell::sync::OnceCell;
 use time::OffsetDateTime;
 use tray_item::TrayItem;
@@ -20,7 +20,7 @@ fn main() -> Result<(), Error> {
     let mut battery = get_battery();
     let percentages = vec![(
         OffsetDateTime::now_utc(),
-        battery.state_of_charge().get::<percent>(),
+        battery.state_of_charge().get::<ratio>(),
     )];
     MEASUREMENTS.set(Mutex::new(percentages)).unwrap();
 
@@ -70,7 +70,7 @@ fn update(battery: &mut Battery) -> Result<(), Error> {
     battery.refresh()?;
 
     let time = OffsetDateTime::now_utc();
-    let percentage = battery.state_of_charge().get::<percent>();
+    let percentage = battery.state_of_charge().get::<ratio>();
 
     let mut lock = MEASUREMENTS.get().unwrap().lock().unwrap();
     lock.push((time, percentage));
@@ -108,7 +108,7 @@ fn render_template() -> Result<(), std::io::Error> {
         .replace(
             "{y}",
             &y.iter()
-                .map(|perc| format!("\"{}%\"", perc))
+                .map(|perc| format!("\"{}\"", perc))
                 .collect::<Vec<_>>()
                 .join(","),
         )
@@ -118,7 +118,7 @@ fn render_template() -> Result<(), std::io::Error> {
                 "{}% in {}h {}m",
                 battery_change,
                 elapsed.whole_hours(),
-                elapsed.whole_minutes()
+                elapsed.whole_minutes() % 60,
             ),
         );
 
