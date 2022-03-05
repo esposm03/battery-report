@@ -1,0 +1,12 @@
+[package]
+name = "battery-report"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+battery = "0.7.8"
+ctrlc = "3.2.1"
+once_cell = "1.10.0"
+open = "2.1.1"
+time = "0.3.7"
+tray-item = "0.7.0"

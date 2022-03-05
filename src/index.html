@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Battery Report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>{chartjs}</script>
+
+</head>
+
+<body>
+  <canvas id="myChart" width="400" height="400"></canvas>
+</body>
+
+
+<script>
+  const ctx = 'myChart';
+
+  const DATA_COUNT = 7;
+  const NUMBER_CFG = {count: DATA_COUNT, min: -100, max: 100};
+
+  const data = {
+    labels: [{x}],
+    datasets: [{
+      label: "Battery percentage",
+      data: [{y}],
+      borderColor: "rgb(255, 0, 0)"
+    }]
+  };
+
+  const config = {
+    type: 'line',
+    data: data,
+    options: {
+      responsive: false,
+      plugins: {
+        title: {
+          display: true,
+          text: '{title}'
+        }
+      }
+    },
+  };
+
+  const myChart = new Chart(ctx, config);
+</script>
+
+</html>
