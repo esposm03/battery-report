@@ -17,35 +17,12 @@ static HTML: &'static str = include_str!("./index.html");
 static CHARTJS: &'static str = include_str!("./chart.min.js");
 
 fn main() -> Result<(), Error> {
-    let mut battery = get_battery();
+    let battery = get_battery();
     let percentages = vec![(
         OffsetDateTime::now_utc(),
         battery.state_of_charge().get::<ratio>(),
     )];
     MEASUREMENTS.set(Mutex::new(percentages)).unwrap();
-
-    let mut tray = TrayItem::new("Battery Status", "").unwrap();
-    tray.add_menu_item("Show data", || {
-        let mut battery = get_battery();
-
-        update(&mut battery).unwrap();
-
-        render_template().unwrap();
-        open::that("/tmp/battery_report.html").unwrap();
-    })
-    .unwrap();
-    tray.add_menu_item("Quit", || {
-        let mut battery = get_battery();
-
-        update(&mut battery).unwrap();
-
-        render_template().unwrap();
-        open::that("/tmp/battery_report.html").unwrap();
-
-        process::exit(0);
-    })
-    .unwrap();
-    tray.inner_mut().display();
 
     ctrlc::set_handler(move || {
         let mut battery = get_battery();
@@ -59,10 +36,17 @@ fn main() -> Result<(), Error> {
     })
     .unwrap();
 
-    loop {
-        thread::sleep(Duration::from_secs(300));
-        update(&mut battery).expect("Failed to update battery status");
-    }
+    thread::spawn(|| {
+        let mut battery = get_battery();
+        loop {
+            thread::sleep(Duration::from_secs(300));
+            update(&mut battery).expect("Failed to update battery status");
+        }
+    });
+
+    setup_tray();
+
+    Ok(())
 }
 
 /// Update `DATA`
@@ -87,6 +71,32 @@ fn get_battery() -> Battery {
         .next()
         .unwrap()
         .unwrap()
+}
+
+/// Function that sets up the tray, and blocks forever
+fn setup_tray() {
+    let mut tray = TrayItem::new("Battery Status", "").unwrap();
+    tray.add_menu_item("Show data", || {
+        let mut battery = get_battery();
+
+        update(&mut battery).unwrap();
+
+        render_template().unwrap();
+        open::that("/tmp/battery_report.html").unwrap();
+    })
+    .unwrap();
+    tray.add_menu_item("Quit", || {
+        let mut battery = get_battery();
+
+        update(&mut battery).unwrap();
+
+        render_template().unwrap();
+        open::that("/tmp/battery_report.html").unwrap();
+
+        process::exit(0);
+    })
+    .unwrap();
+    tray.inner_mut().display();
 }
 
 fn render_template() -> Result<(), std::io::Error> {
