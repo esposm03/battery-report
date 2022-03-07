@@ -5,51 +5,29 @@
   <title>Battery Report</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script>{chartjs}</script>
+  <script src="https://cdn.plot.ly/plotly-2.9.0.min.js"></script>
 
 </head>
 
 <body>
-  <canvas id="myChart" width="400" height="400"></canvas>
+  <h2>{title}</h2>
+
+  <div id="myChart"></div>
 </body>
 
 
 <script>
-  const ctx = 'myChart';
+  let data = [{
+    x: [{x}],
+    y: [{y}],
+    type: "scatter",
+  }];
 
-  const DATA_COUNT = 7;
-  const NUMBER_CFG = {count: DATA_COUNT, min: -100, max: 100};
-
-  const data = {
-    labels: [{x}],
-    datasets: [{
-      label: "Battery percentage",
-      data: [{y}],
-      borderColor: "rgb(255, 0, 0)"
-    }]
+  let layout = {
+    yaxis: {range: [0, 100]},
   };
 
-  const config = {
-    type: 'line',
-    data: data,
-    options: {
-      responsive: false,
-      scales: {
-        y: {
-          max: 1,
-          min: 0,
-        },
-      },
-      plugins: {
-        title: {
-          display: true,
-          text: '{title}'
-        }
-      }
-    },
-  };
-
-  const myChart = new Chart(ctx, config);
+  Plotly.newPlot('myChart', data, layout);
 </script>
 
 </html>

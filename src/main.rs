@@ -14,7 +14,7 @@ use std::{
 
 static MEASUREMENTS: OnceCell<Mutex<Vec<(OffsetDateTime, f32)>>> = OnceCell::new();
 static HTML: &'static str = include_str!("./index.html");
-static CHARTJS: &'static str = include_str!("./chart.min.js");
+static PLOTLY: &'static str = include_str!("./plotly-2.9.0.min.js");
 
 fn main() -> Result<(), Error> {
     let battery = get_battery();
@@ -107,25 +107,35 @@ fn render_template() -> Result<(), std::io::Error> {
 
     let string = HTML
         .to_string()
-        .replace("{chartjs}", CHARTJS)
+        .replace("{plotly}", PLOTLY)
         .replace(
             "{x}",
             &x.iter()
-                .map(|date| format!("\"{:02}:{:02}\"", date.hour(), date.minute()))
+                .map(|date| {
+                    format!(
+                        "'{:04}-{:02}-{:02} {:02}:{:02}:{:02}'",
+                        date.year(),
+                        date.month() as u8,
+                        date.day(),
+                        date.hour(),
+                        date.minute(),
+                        date.second(),
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join(","),
         )
         .replace(
             "{y}",
             &y.iter()
-                .map(|perc| format!("\"{}\"", perc))
+                .map(|perc| format!("'{:.2}%'", perc * 100.0))
                 .collect::<Vec<_>>()
                 .join(","),
         )
         .replace(
             "{title}",
             &format!(
-                "{}% in {}h {}m",
+                "{:.2}% in {}h {}m",
                 battery_change,
                 elapsed.whole_hours(),
                 elapsed.whole_minutes() % 60,
