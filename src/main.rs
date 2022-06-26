@@ -136,7 +136,7 @@ fn render_template() -> Result<(), std::io::Error> {
             "{title}",
             &format!(
                 "{:.2}% in {}h {}m",
-                battery_change,
+                battery_change * 100.0,
                 elapsed.whole_hours(),
                 elapsed.whole_minutes() % 60,
             ),
