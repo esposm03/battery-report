@@ -1,4 +1,4 @@
-use battery::{units::ratio::ratio, Battery, Error, Manager};
+use starship_battery::{units::ratio::ratio, Battery, Error, Manager};
 use once_cell::sync::OnceCell;
 use time::OffsetDateTime;
 use tray_item::TrayItem;
