@@ -1,5 +1,5 @@
-use starship_battery::{units::ratio::ratio, Battery, Error, Manager};
 use once_cell::sync::OnceCell;
+use starship_battery::{units::ratio::ratio, Battery, Error, Manager};
 use time::OffsetDateTime;
 use tray_item::TrayItem;
 
@@ -13,8 +13,8 @@ use std::{
 };
 
 static MEASUREMENTS: OnceCell<Mutex<Vec<(OffsetDateTime, f32)>>> = OnceCell::new();
-static HTML: &'static str = include_str!("./index.html");
-static PLOTLY: &'static str = include_str!("./plotly-2.9.0.min.js");
+static HTML: &str = include_str!("./index.html");
+static PLOTLY: &str = include_str!("./plotly-2.9.0.min.js");
 
 fn main() -> Result<(), Error> {
     let battery = get_battery();
@@ -102,8 +102,18 @@ fn setup_tray() {
 fn render_template() -> Result<(), std::io::Error> {
     let lock = MEASUREMENTS.get().unwrap().lock().unwrap();
     let (x, y): (Vec<_>, Vec<_>) = lock.iter().cloned().unzip();
-    let elapsed = lock.last().unwrap().0 - lock.first().unwrap().0;
-    let battery_change = lock.last().unwrap().1 - lock.first().unwrap().1;
+
+    let mut max = lock.len() - 1;
+    for i in (0..lock.len()).rev() {
+        if lock[i].1 >= lock[max].1 {
+            max = i;
+        } else {
+            break;
+        }
+    }
+
+    let elapsed = lock[lock.len() - 1].0 - lock[max].0;
+    let battery_change = lock[lock.len() - 1].1 - lock[max].1;
 
     let string = HTML
         .to_string()
